@@ -12,15 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('subscriptions', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('client_id')->unsigned();
-            $table->foreign('client_id')->references('id')->on('clients');
-
-            $table->integer('product_id')->unsigned();
-            $table->foreign('product_id')->references('id')->on('products');
-
+            $table->bigIncrements('id');
+            $table->foreignId('client_id')->constrained()->onDelete('cascade');
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->date('initial_date');
             $table->date('final_date');
+
             $table->timestamps();
         });
     }

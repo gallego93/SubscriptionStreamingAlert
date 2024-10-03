@@ -28,14 +28,39 @@ class subscriptions extends Model
     protected $fillable = [
         'client_id',
         'product_id',
+        'user_id',
         'initial_date',
         'final_date',
     ];
 
+    /**
+     * Scope a query to include search functionality.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string|null $search
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWithSearch($query, $search)
+    {
+        if ($search) {
+            $query->where('client_id', 'like', '%' . $search . '%')
+                ->orWhere('product_id', 'like', '%' . $search . '%')
+                ->orWhere('initial_date', 'like', '%' . $search . '%')
+                ->orWhere('final_date', 'like', '%' . $search . '%')
+                ->orWhereHas('client', function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('product', function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%');
+                });
+        }
+        return $query;
+    }
+
     public function sendMessage($date)
     {
         $date = Carbon::now();
-    } 
+    }
 
     public function client()
     {

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Subscriptions;
 use App\Models\Clients;
+use App\Models\Message;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -40,14 +41,29 @@ class SendReminderEmails extends Command
         try {
             $date = Carbon::now()->addDays(8)->toDateString();
             $subscriptions = Subscriptions::where('final_date', $date)->get();
+            // Recupera el mensaje desde la base de datos
+            $emailMessage = Message::latest()->first();
+
+            // Verifica si $emailMessage es null
+            if (!$emailMessage) {
+                Log::warning('No message found in the database.');
+                return; // Salir del comando si no hay mensaje
+            }
+
+            // Log para confirmar que el mensaje se ha recuperado correctamente
+            Log::info('Message content: ' . $emailMessage->message);
 
             foreach ($subscriptions as $subscription) {
                 $client = Clients::find($subscription->client_id);
-                if ($client) {
+                if ($client && $client->email) {
                     Log::info('Sending email to ' . $client->email);
-                    Mail::to($client->email)->send(new \App\Mail\ReminderEmail($subscription));
+                    try {
+                        Mail::to($client->email)->send(new \App\Mail\ReminderEmail($subscription, $emailMessage));
+                    } catch (\Exception $e) {
+                        Log::error('Failed to send email to ' . $client->email . ': ' . $e->getMessage());
+                    }
                 } else {
-                    Log::warning('Client not found for subscription ID: ' . $subscription->id);
+                    Log::warning('Client not found or email missing for subscription ID: ' . $subscription->id);
                 }
             }
         } catch (\Exception $e) {

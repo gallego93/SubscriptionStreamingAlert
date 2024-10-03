@@ -13,4 +13,5 @@ return [
     'message' => 'Mensaje',
     'edit' => 'Editar',
     'write_message' => 'Escribe aquí tus pensamientos...',
+    'no_records' => 'No existen registros.',
 ];
