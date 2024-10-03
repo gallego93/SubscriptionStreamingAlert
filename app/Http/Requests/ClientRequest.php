@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ClientRequest extends FormRequest
 {
@@ -21,9 +22,7 @@ class ClientRequest extends FormRequest
      */
     public function rules(): array
     {
-        //dd($this->route('id'));
-
-        $clientId = $this->route('id'); // Obtiene el ID del cliente desde la ruta
+        $clientId = $this->route('client');
 
         return [
             'name' => 'required|string|max:255',
@@ -31,15 +30,13 @@ class ClientRequest extends FormRequest
                 'required',
                 'email',
                 'max:255',
-                // Si es una actualización, se excluye la validación de unicidad para este ID
-                'unique:clients,email,'. $clientId,
+                Rule::unique('clients', 'email')->ignore($clientId)
             ],
             'phone' => [
                 'required',
                 'string',
                 'max:10',
-                // Si es una actualización, se excluye la validación de unicidad para este ID
-                'unique:clients,phone,'. $clientId,
+                Rule::unique('clients', 'phone')->ignore($clientId)
             ],
         ];
     }

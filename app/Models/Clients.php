@@ -29,7 +29,25 @@ class Clients extends Model
         'address',
         'phone',
         'email',
+        'user_id',
     ];
+
+    /**
+     * Scope a query to include search functionality.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string|null $search
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWithSearch($query, $search)
+    {
+        if ($search) {
+            $query->where('name', 'like', '%' . $search . '%')
+                ->orWhere('address', 'like', '%' . $search . '%')
+                ->orWhere('phone', 'like', '%' . $search . '%')
+                ->orWhere('email', 'like', '%' . $search . '%');
+        }
+    }
 
     public function subscriptions()
     {

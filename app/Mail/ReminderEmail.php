@@ -9,19 +9,22 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Subscriptions;
+use App\Models\Message;
 
 class ReminderEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $subscription;
+    public $emailMessage;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Subscriptions $subscription)
+    public function __construct($subscription, $emailMessage)
     {
         $this->subscription = $subscription;
+        $this->emailMessage = $emailMessage;
     }
 
     /**
@@ -30,18 +33,16 @@ class ReminderEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Recordatorio de Suscripción',
+            subject: 'Asunto: ¡Tu suscripción está por vencer! 🚨',
         );
     }
 
     /**
      * Get the message content definition.
      */
-    public function content(): Content
+    public function build()
     {
-        return new Content(
-            view: 'emails.reminder',
-        );
+        return $this->view('emails.reminder');
     }
 
     /**

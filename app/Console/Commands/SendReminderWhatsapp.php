@@ -54,7 +54,6 @@ class SendReminderWhatsapp extends Command
             foreach ($scheduledMessages as $message) {
                 $this->whatsappService->sendMessage($message['to'], $message['message']);
             }
-
         } catch (\Exception $e) {
             Log::error('Error in SendReminderWhatsapp: ' . $e->getMessage());
         }

@@ -5,33 +5,37 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Clients;
 use App\Http\Requests\ClientRequest;
+use App\Http\Requests\IndexRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Exception;
+use App\Traits\LogTrait;
+use Illuminate\Support\Facades\Auth;
 
 class ClientController extends Controller
 {
+    use LogTrait;
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {   
+    public function index(IndexRequest $request)
+    {
         $perPage = $request->input('per_page', 20);
         $search = $request->input('search');
-        if (!in_array($perPage, [5, 10, 20, 50, 100])) {
-            $perPage = 20;
-        }
+        $user = Auth::user();
+
         try {
-            $query = Clients::query();
-            if ($search) {
-                $query->where('name', 'like', '%' . $search . '%')
-                      ->orWhere('address', 'like', '%' . $search . '%')
-                      ->orWhere('phone', 'like', '%' . $search . '%')
-                      ->orWhere('email', 'like', '%' . $search . '%');
+            if ($user->hasRole('admin')) {
+                $clients = Clients::WithSearch($search)->paginate($perPage);
+            } else {
+                $clients = Clients::where('user_id', $user->id)
+                    ->WithSearch($search)
+                    ->paginate($perPage);
             }
-            $clients = $query->paginate($perPage);
-                return view('clients.index', compact('clients','perPage','search'));
+
+            return view('clients.index', compact('clients', 'perPage', 'search'));
         } catch (Exception $e) {
+            $this->logError($e);
             return redirect()->route('dashboard')->with('error', 'Hubo un problema al cargar los clientes.');
         }
     }
@@ -50,14 +54,19 @@ class ClientController extends Controller
     public function store(ClientRequest $request)
     {
         try {
-            $client = Clients::create($request->all());
-                return redirect()->route('clients.index', $client->id)
-                    ->with('info', 'Cliente ' . $client->name . ' guardado con éxito!');
+            $clientData = $request->all();
+            $clientData['user_id'] = auth()->id();
+
+            $client = Clients::create($clientData);
+
+            return redirect()->route('clients.index', $client->id)
+                ->with('info', 'Cliente ' . $client->name . ' guardado con éxito!');
         } catch (ValidationException $e) {
             return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (Exception $e) {
-            return redirect()->route('clients.index')->with('error', 'No se pudo guardar el cliente.');    
-        }        
+            $this->logError($e);
+            return redirect()->route('clients.index')->with('error', 'No se pudo guardar el cliente.');
+        }
     }
 
     /**
@@ -67,12 +76,12 @@ class ClientController extends Controller
     {
         try {
             $client = Clients::findOrFail($id);
-                return view('clients.show', compact('client'));
+            return view('clients.show', compact('client'));
         } catch (ModelNotFoundException $e) {
             return redirect()->route('clients.index')->with('error', 'Cliente no encontrado.');
         } catch (Exception $e) {
             return redirect()->route('clients.index')->with('error', 'Hubo un problema al mostrar el cliente.');
-        }  
+        }
     }
 
     /**
@@ -82,7 +91,7 @@ class ClientController extends Controller
     {
         try {
             $client = Clients::findOrFail($id);
-                return view('clients.edit', compact('client'));
+            return view('clients.edit', compact('client'));
         } catch (ModelNotFoundException $e) {
             return redirect()->route('clients.index')->with('error', 'Cliente no encontrado.');
         } catch (Exception $e) {
@@ -95,9 +104,9 @@ class ClientController extends Controller
      */
     public function update(ClientRequest $request, string $id)
     {
-        try { 
-        $client = Clients::findOrFail($id);
-        $client->update($request->all());
+        try {
+            $client = Clients::findOrFail($id);
+            $client->update($request->all());
             return redirect()->route('clients.edit', $client->id)
                 ->with('info', 'Cliente ' . $client->name . ' actualizado con éxito.');
         } catch (ModelNotFoundException $e) {
@@ -117,7 +126,7 @@ class ClientController extends Controller
         try {
             $client = Clients::findOrFail($id);
             $client->delete();
-                return back()->with('info', 'Cliente eliminado con éxito.');
+            return back()->with('info', 'Cliente eliminado con éxito.');
         } catch (ModelNotFoundException $e) {
             return redirect()->route('clients.index')->with('error', 'Cliente no encontrado.');
         } catch (Exception $e) {

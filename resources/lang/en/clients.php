@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'clients' =>'Clients',
+    'clients' => 'Clients',
     'add_new_record' => 'New',
     'name' => 'Name',
     'address' => 'Address',
@@ -12,5 +12,6 @@ return [
     'save' => 'Save',
     'delete' => 'Delete',
     'edit' => 'Edit',
-    'update_record' => 'Update'
+    'update_record' => 'Update',
+    'no_records' => 'There are no records.',
 ];

@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use phpDocumentor\Reflection\Types\This;
+use Illuminate\Validation\Rule;
 
 class ProductRequest extends FormRequest
 {
@@ -22,19 +22,19 @@ class ProductRequest extends FormRequest
      */
     public function rules(): array
     {
-        $clientId = $this->route('id');
+        $ProductId = $this->route('product');
 
         return [
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                'unique:products,name,' . $clientId,
+                Rule::unique('products', 'name')->ignore($ProductId)
             ],
 
             'price' => 'required|string|max:255',
             'period' => 'max:255',
-            
+
         ];
     }
     /**
@@ -42,7 +42,7 @@ class ProductRequest extends FormRequest
      */
     public function messages(): array
     {
-        return[
+        return [
             'name.required' => 'El nombre del producto es obligatorio.',
             'name.string' => 'El nombre del producto debe ser una cadena de texto.',
             'name.max' => 'El nombre del producto no puede contener mas de 255 caracteres.',
@@ -55,5 +55,4 @@ class ProductRequest extends FormRequest
             'period.max' => 'El periodo del producto no puede contener mas de 255 caracteres.',
         ];
     }
-    
 }

@@ -25,7 +25,25 @@ class Products extends Model
         'name',
         'price',
         'period',
+        'user_id',
     ];
+
+    /**
+     * Scope a query to include search functionality.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string|null $search
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWithSearch($query, $search)
+    {
+        if ($search) {
+            $query->where('name', 'like', '%' . $search . '%')
+                ->orWhere('price', 'like', '%' . $search . '%')
+                ->orWhere('period', 'like', '%' . $search . '%');
+        }
+        return $query;
+    }
 
     public function subscriptions()
     {

@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Subscriptions;
 use App\Models\Clients;
 use App\Models\Products;
 use App\Http\Requests\SubscriptionRequest;
+use App\Http\Requests\IndexRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
+use App\Traits\LogTrait;
 use Exception;
 
 class SubscriptionController extends Controller
@@ -16,29 +19,24 @@ class SubscriptionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {   
+    public function index(IndexRequest $request)
+    {
         $perPage = $request->input('per_page', 20);
         $search = $request->input('search');
-        if (!in_array($perPage, [5, 10, 20, 50, 100])) {
-            $perPage = 20;
-        }
+        $user = Auth::user();
+
         try {
-            $query = Subscriptions::query();
-            $query->join('clients', 'subscriptions.client_id', '=', 'clients.id')
-                  ->join('products', 'subscriptions.product_id', '=', 'products.id');
-            if ($search) {
-                $query->where('client_id', 'like', '%' . $search . '%')
-                      ->orWhere('product_id', 'like', '%' . $search . '%')
-                      ->orWhere('initial_date', 'like', '%' . $search . '%')
-                      ->orWhere('final_date', 'like', '%' . $search . '%')
-                      ->orWhere('clients.name', 'like', '%' . $search . '%') // Ejemplo de búsqueda en tabla relacionada
-                      ->orWhere('products.name', 'like', '%' . $search . '%'); // Ejemplo de búsqueda en tabla relacionada
+            if ($user->hasRole('admin')) {
+                $subscriptions = Subscriptions::WithSearch($search)->paginate($perPage);
+            } else {
+                $subscriptions = Subscriptions::where('user_id', $user->id)
+                    ->WithSearch($search)
+                    ->paginate($perPage);
             }
-            $subscriptions = $query->paginate($perPage);
-                return view('subscriptions.index', compact('subscriptions','perPage','search'));
+
+            return view('subscriptions.index', compact('subscriptions', 'perPage', 'search'));
         } catch (Exception $e) {
-            return redirect()->route('dashboard')->with('error', 'Hubo un problema al cargar las suscripcione.');
+            return redirect()->route('dashboard')->with('error', 'Hubo un problema al cargar las suscripciones.');
         }
     }
 
@@ -47,9 +45,10 @@ class SubscriptionController extends Controller
      */
     public function create()
     {
-        $client_id = Clients::all();
-        $product_id = Products::all();
-            return view('subscriptions.create', compact('client_id', 'product_id'));
+        $clients = Clients::pluck('name', 'id');
+        $products = Products::pluck('name', 'id');
+
+        return view('subscriptions.create', compact('clients', 'products'));
     }
 
     /**
@@ -58,13 +57,17 @@ class SubscriptionController extends Controller
     public function store(SubscriptionRequest $request)
     {
         try {
-            $subscription = Subscriptions::create($request->all());
-                return redirect()->route('subscriptions.index', $subscription->id)
-                    ->with('info', 'Subscripcion ' . $subscription->name . ' guardado con éxito!');
+            $subscriptionData = $request->all();
+            $subscriptionData['user_id'] = auth()->id();
+
+            $subscription = Subscriptions::create($subscriptionData);
+
+            return redirect()->route('subscriptions.index')
+                ->with('info', 'Subscripción guardada con éxito!');
         } catch (ValidationException $e) {
             return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (Exception $e) {
-            return redirect()->route('subscriptions.index')->with('error', 'No se pudo guardar la suscripcion.');    
+            return redirect()->route('subscriptions.index')->with('error', 'Hubo un problema al guardar la suscripción.');
         }
     }
 
@@ -74,12 +77,13 @@ class SubscriptionController extends Controller
     public function show(string $id)
     {
         try {
-            $subscription = Subscriptions::find($id);
-                return view('subscriptions.show', compact('subscription'));    
+            $subscription = Subscriptions::findOrFail($id);
+
+            return view('subscriptions.show', compact('subscription'));
         } catch (ModelNotFoundException $e) {
-            return redirect()->route('subscriptions.index')->with('error', 'Suscripcion no encontrada.');
+            return redirect()->route('subscriptions.index')->with('error', 'Suscripción no encontrada.');
         } catch (Exception $e) {
-            return redirect()->route('subscriptions.index')->with('error', 'Hubo un problema al mostrar la suscripcion.');
+            return redirect()->route('subscriptions.index')->with('error', 'Hubo un problema al mostrar la suscripción.');
         }
     }
 
@@ -89,12 +93,13 @@ class SubscriptionController extends Controller
     public function edit(string $id)
     {
         try {
-            $client_id = Clients::all();
-            $product_id = Products::all();
+            $clients = Clients::pluck('name', 'id');
+            $products = Products::pluck('name', 'id');
             $subscription = Subscriptions::findOrFail($id);
-                return view('subscriptions.edit', compact('subscription', 'client_id', 'product_id'));
+
+            return view('subscriptions.edit', compact('subscription', 'clients', 'products'));
         } catch (ModelNotFoundException $e) {
-            return redirect()->route('subscriptions.index')->with('error', 'Suscripcion no encontrado.');
+            return redirect()->route('subscriptions.index')->with('error', 'Suscripción no encontrada.');
         } catch (Exception $e) {
             return redirect()->route('subscriptions.index')->with('error', 'Hubo un problema al cargar el formulario de edición.');
         }
@@ -107,15 +112,16 @@ class SubscriptionController extends Controller
     {
         try {
             $subscription = Subscriptions::findOrFail($id);
-            $subscription->update($request->all());
-                return redirect()->route('subscriptions.edit', $subscription->id)
-                    ->with('info', 'Subscripcion ' . $subscription->name . ' guardado con éxito.');
+            $subscription->update($request->validated());
+
+            return redirect()->route('subscriptions.edit', $subscription->id)
+                ->with('info', 'Subscripción modificada con éxito.');
         } catch (ModelNotFoundException $e) {
-            return redirect()->route('subscriptions.index')->with('error', 'Suscripcion no encontrada.');
+            return redirect()->route('subscriptions.index')->with('error', 'Suscripción no encontrada.');
         } catch (ValidationException $e) {
             return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (Exception $e) {
-            return redirect()->route('subscriptions.index')->with('error', 'No se pudo actualizar la suscripcion.');
+            return redirect()->route('subscriptions.index')->with('error', 'Hubo un problema al actualizar la suscripción.');
         }
     }
 
@@ -127,12 +133,12 @@ class SubscriptionController extends Controller
         try {
             $subscription = Subscriptions::findOrFail($id);
             $subscription->delete();
-                return back()->with('info', 'Subscripcion eliminado con éxito.');
+
+            return back()->with('info', 'Subscripcion eliminado con éxito.');
         } catch (ModelNotFoundException $e) {
-            return redirect()->route('subscriptions.index')->with('error', 'Suscripcion no encontrado.');
+            return redirect()->route('subscriptions.index')->with('error', 'Suscripcion no encontrada.');
         } catch (Exception $e) {
-            return redirect()->route('subscriptions.index')->with('error', 'No se pudo eliminar la suscripcion.');
+            return redirect()->route('subscriptions.index')->with('error', 'Hubo un problema eliminar la suscripcion.');
         }
     }
 }
-

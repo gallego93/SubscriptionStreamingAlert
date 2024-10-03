@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'clients' =>'Clientes',
+    'clients' => 'Clientes',
     'add_new_record' => 'Nuevo',
     'name' => 'Nombre',
     'address' => 'Direccion',
@@ -12,5 +12,6 @@ return [
     'save' => 'Guardar',
     'delete' => 'Eliminar',
     'edit' => 'Editar',
-    'update_record' => 'Modificar'
+    'update_record' => 'Modificar',
+    'no_records' => 'No existen registros.',
 ];

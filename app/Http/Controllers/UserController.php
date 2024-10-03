@@ -2,34 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\IndexRequest;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Http\Requests\UserRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
+use App\Traits\LogTrait;
+use Spatie\Permission\Models\Role;
 use Exception;
 
 class UserController extends Controller
 {
+    use LogTrait;
+
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {   
+    public function index(IndexRequest $request)
+    {
         $perPage = $request->input('per_page', 20);
         $search = $request->input('search');
-        if (!in_array($perPage, [5, 10, 20, 50, 100])) {
-            $perPage = 20;
-        }
+
         try {
-            $query = User::query();
-            if ($search) {
-                $query->where('name', 'like', '%' . $search . '%')
-                      ->orWhere('email', 'like', '%' . $search . '%');
-            }
-            $users = $query->paginate($perPage);
-                return view('users.index', compact('users','perPage','search'));
+            $users = User::withSearch($search)
+                ->paginate($perPage);
+
+            return view('users.index', compact('users', 'perPage', 'search'));
         } catch (Exception $e) {
+            $this->logError($e);
             return redirect()->route('dashboard')->with('error', 'Hubo un problema al cargar los usuarios.');
         }
     }
@@ -54,7 +55,7 @@ class UserController extends Controller
         } catch (ValidationException $e) {
             return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (Exception $e) {
-            return redirect()->route('users.index')->with('error', 'No se pudo guardar el usuario.');    
+            return redirect()->route('users.index')->with('error', 'No se pudo guardar el usuario.');
         }
     }
 
@@ -65,7 +66,7 @@ class UserController extends Controller
     {
         try {
             $user = User::find($id);
-                return view('users.show', compact('user'));    
+            return view('users.show', compact('user'));
         } catch (ModelNotFoundException $e) {
             return redirect()->route('users.index')->with('error', 'Usuario no encontrado.');
         } catch (Exception $e) {
@@ -80,7 +81,9 @@ class UserController extends Controller
     {
         try {
             $user = User::find($id);
-                return view('users.edit', compact('user'));
+            $roles = Role::all();
+            $userRoles = $user->roles->pluck('name')->toArray();
+            return view('users.edit', compact('user', 'roles', 'userRoles'));
         } catch (ModelNotFoundException $e) {
             return redirect()->route('users.index')->with('error', 'Usuario no encontrado.');
         } catch (Exception $e) {
@@ -95,9 +98,19 @@ class UserController extends Controller
     {
         try {
             $user = User::find($id);
-            $user->update($request->all());
-        return redirect()->route('users.edit', $user->id)
-            ->with('info', 'Usuario ' . $user->name . ' guardado con éxito.');
+            $user->update($request->except('roles'));
+
+            // Actualizar los roles del usuario
+            if ($request->has('roles')) {
+                $user->syncRoles($request->input('roles'));
+            }
+
+            if ($request->filled('password')) {
+                $user->update(['password' => bcrypt($request->input('password'))]);
+            }
+
+            return redirect()->route('users.edit', $user->id)
+                ->with('info', 'Usuario ' . $user->name . ' guardado con éxito.');
         } catch (ModelNotFoundException $e) {
             return redirect()->route('users.index')->with('error', 'Usuario no encontrado.');
         } catch (ValidationException $e) {

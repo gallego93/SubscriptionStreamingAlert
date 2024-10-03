@@ -13,4 +13,5 @@ return [
     'add_new_record' => 'Nuevo',
     'update_record' => 'Modificar',
     'save' => 'Guardar',
+    'no_records' => 'No existen registros.',
 ];
