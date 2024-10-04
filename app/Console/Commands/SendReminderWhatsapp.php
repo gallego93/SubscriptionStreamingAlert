@@ -2,12 +2,17 @@
 
 namespace App\Console\Commands;
 
+use Illuminate\Support\Carbon;
+use App\Models\Subscriptions;
+use App\Models\Message;
+use App\Models\Clients;
 use Illuminate\Console\Command;
-use App\Providers\WhatsAppServiceProvider;
-use Illuminate\Support\Facades\Log;
+use App\Providers\WhatsappServiceProvider;
+use App\Traits\LogTrait;
 
 class SendReminderWhatsapp extends Command
 {
+    use LogTrait;
     /**
      * The name and signature of the console command.
      *
@@ -20,11 +25,21 @@ class SendReminderWhatsapp extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Send a WhatsApp reminder using Twilio';
 
+    /**
+     * The Twilio WhatsApp Service instance.
+     *
+     * @var TwilioWhatsappService
+     */
     protected $whatsappService;
 
-    public function __construct(WhatsAppServiceProvider $whatsappService)
+    /**
+     * Create a new command instance.
+     *
+     * @param TwilioWhatsappService $whatsappService
+     */
+    public function __construct(WhatsappServiceProvider $whatsappService)
     {
         parent::__construct();
         $this->whatsappService = $whatsappService;
@@ -35,29 +50,34 @@ class SendReminderWhatsapp extends Command
      */
     public function handle()
     {
-
-        Log::info('SendReminderWhatsapp command started.');
-
         try {
-            // Aquí puedes definir la lógica para obtener los mensajes y destinatarios
-            // programados desde la base de datos o cualquier otra fuente.
+            $date = Carbon::now()->addDays(8)->toDateString();
+            $subscriptions = Subscriptions::where('final_date', $date)->get();
+            $whatsAppMessage = Message::latest()->first();
 
-            // Ejemplo de mensajes programados
-            $scheduledMessages = [
-                [
-                    'to' => '573162498060', // Reemplaza con el número de teléfono destinatario
-                    'message' => 'Este es un mensaje programado.'
-                ],
-                // Agrega más mensajes programados según sea necesario
-            ];
+            if (!$whatsAppMessage) {
+                $this->logWarning('No message found in the database.');
+                return;
+            }
 
-            foreach ($scheduledMessages as $message) {
-                $this->whatsappService->sendMessage($message['to'], $message['message']);
+            //$this->logInfo('Message content: ' . $whatsAppMessage->message);
+
+            foreach ($subscriptions as $subscription) {
+                $client = Clients::find($subscription->client_id);
+                if ($client && $client->phone) {
+                    $this->logInfo('Sending WhatsApp message to ' . $client->phone);
+                    try {
+                        $response = $this->whatsappService->sendWhatsappMessage($client->phone, $whatsAppMessage);
+                        $this->logInfo('Whatsapp message sent successfully to ' . $client->phone);
+                    } catch (\Exception $e) {
+                        $this->logError($e, 'Failed to send WhatsApp message to ' . $client->phone);
+                    }
+                } else {
+                    $this->logWarning('Client not found or phone number missing for subscription ID: ' . $subscription->id);
+                }
             }
         } catch (\Exception $e) {
-            Log::error('Error in SendReminderWhatsapp: ' . $e->getMessage());
+            $this->logError($e, 'Error while sending WhatsApp reminders: ');
         }
-
-        Log::info('SendReminderWhatsapp command finished.');
     }
 }

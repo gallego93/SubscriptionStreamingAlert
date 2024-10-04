@@ -35,7 +35,7 @@ class ClientRequest extends FormRequest
             'phone' => [
                 'required',
                 'string',
-                'max:10',
+                'max:20',
                 Rule::unique('clients', 'phone')->ignore($clientId)
             ],
         ];
