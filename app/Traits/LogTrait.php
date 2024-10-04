@@ -16,10 +16,7 @@ trait LogTrait
      */
     public function logError(\Exception $e, $customMessage = null, array $context = [])
     {
-        // Mensaje personalizado o el mensaje de la excepción
         $message = $customMessage ?? $e->getMessage();
-
-        // Contexto adicional
         $context = array_merge([
             'exception_message' => $e->getMessage(),
             'file' => $e->getFile(),
@@ -27,8 +24,42 @@ trait LogTrait
             'trace' => $e->getTraceAsString(),
         ], $context);
 
-        // Registro del log
         Log::error($message, $context);
     }
-}
 
+    /**
+     * Registra una advertencia en el log.
+     *
+     * @param string $message
+     * @param array $context
+     * @return void
+     */
+    public function logWarning($message, array $context = [])
+    {
+        Log::warning($message, $context);
+    }
+
+    /**
+     * Registra información en el log.
+     *
+     * @param string $message
+     * @param array $context
+     * @return void
+     */
+    public function logInfo($message, array $context = [])
+    {
+        Log::info($message, $context);
+    }
+
+    /**
+     * Registra información crítica en el log.
+     *
+     * @param string $message
+     * @param array $context
+     * @return void
+     */
+    public function logCritical($message, array $context = [])
+    {
+        Log::critical($message, $context);
+    }
+}

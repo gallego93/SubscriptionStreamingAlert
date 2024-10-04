@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Carbon\Carbon;
 
-class subscriptions extends Model
+class Subscriptions extends Model
 {
     use HasFactory;
 
