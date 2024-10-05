@@ -29,6 +29,8 @@ class Clients extends Model
         'address',
         'phone',
         'email',
+        'email_send',
+        'whatsapp_send',
         'user_id',
     ];
 

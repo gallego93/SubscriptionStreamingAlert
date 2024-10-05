@@ -52,7 +52,12 @@ class SendReminderWhatsapp extends Command
     {
         try {
             $date = Carbon::now()->addDays(8)->toDateString();
-            $subscriptions = Subscriptions::where('final_date', $date)->get();
+            $subscriptions = Subscriptions::where('final_date', $date)
+                ->where('status', true)
+                ->join('clients', 'subscriptions.client_id', '=', 'clients.id')
+                ->where('clients.whatsapp_send', true)
+                ->select('subscriptions.*')
+                ->get();
             $whatsAppMessage = Message::latest()->first();
 
             if (!$whatsAppMessage) {
@@ -64,7 +69,7 @@ class SendReminderWhatsapp extends Command
 
             foreach ($subscriptions as $subscription) {
                 $client = Clients::find($subscription->client_id);
-                if ($client && $client->phone) {
+                if ($client && $client->phone && $client->whatsapp_send) {
                     $this->logInfo('Sending WhatsApp message to ' . $client->phone);
                     try {
                         $response = $this->whatsappService->sendWhatsappMessage($client->phone, $whatsAppMessage);

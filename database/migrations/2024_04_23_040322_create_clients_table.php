@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->string('phone', 20);
             $table->string('email', 100)->unique();
+            $table->boolean('email_send')->default(false);
+            $table->boolean('whatsapp_send')->default(false);
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
