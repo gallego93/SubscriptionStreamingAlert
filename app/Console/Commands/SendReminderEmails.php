@@ -39,7 +39,13 @@ class SendReminderEmails extends Command
     {
         try {
             $date = Carbon::now()->addDays(8)->toDateString();
-            $subscriptions = Subscriptions::where('final_date', $date)->get();
+            $subscriptions = Subscriptions::where('final_date', $date)
+                ->where('status', true)
+                ->join('clients', 'subscriptions.client_id', '=', 'clients.id')
+                ->where('clients.email_send', true)
+                ->select('subscriptions.*')
+                ->get();
+
             $emailMessage = Message::latest()->first();
 
             if (!$emailMessage) {
@@ -51,6 +57,7 @@ class SendReminderEmails extends Command
 
             foreach ($subscriptions as $subscription) {
                 $client = Clients::find($subscription->client_id);
+
                 if ($client && $client->email) {
                     $this->logInfo('Sending Email to ' . $client->email);
                     try {

@@ -31,6 +31,7 @@ class Subscriptions extends Model
         'user_id',
         'initial_date',
         'final_date',
+        'status',
     ];
 
     /**

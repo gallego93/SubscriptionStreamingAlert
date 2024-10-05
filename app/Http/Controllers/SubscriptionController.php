@@ -112,7 +112,12 @@ class SubscriptionController extends Controller
     {
         try {
             $subscription = Subscriptions::findOrFail($id);
-            $subscription->update($request->validated());
+
+            // Convertir checkboxes a booleano
+            $requestData = $request->validated();
+            $requestData['status'] = $request->has('status');
+
+            $subscription->update($requestData);
 
             return redirect()->route('subscriptions.edit', $subscription->id)
                 ->with('info', 'Subscripción modificada con éxito.');

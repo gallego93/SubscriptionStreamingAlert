@@ -106,7 +106,14 @@ class ClientController extends Controller
     {
         try {
             $client = Clients::findOrFail($id);
-            $client->update($request->all());
+
+            // Convertir checkboxes a booleano
+            $requestData = $request->validated();
+            $requestData['email_send'] = $request->has('email_send');
+            $requestData['whatsapp_send'] = $request->has('whatsapp_send');
+
+            $client->update($requestData);
+
             return redirect()->route('clients.edit', $client->id)
                 ->with('info', 'Cliente ' . $client->name . ' actualizado con éxito.');
         } catch (ModelNotFoundException $e) {
