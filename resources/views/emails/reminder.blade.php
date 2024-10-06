@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <p>Hola {{ $subscription->Client->name }}, </p>
+    <p>Hola, {{ $subscription->Client->name }} </p>
 
     <p>{!! $emailMessage->message !!}</p>
 

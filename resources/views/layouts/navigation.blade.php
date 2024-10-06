@@ -67,8 +67,8 @@
                     </x-nav-link>
                 </div>
                 @endcan
-
             </div>
+
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
@@ -104,16 +104,18 @@
                         </form>
                         <!-- Traslation -->
                         @if (config('locale.status') && count(config('locale.languages')) > 1)
-                        <div class="top-right links">
-                            @foreach (array_keys(config('locale.languages')) as $lang)
-                            @if ($lang != App::getLocale())
-                            <x-dropdown-link href="{!! route('lang.swap', $lang) !!}">
-                                {!! $lang !!} <small>{!! $lang !!}</small>
-                            </x-dropdown-link>
-                            @endif
-                            @endforeach
-                        </div>
+
+                        @foreach (array_keys(config('locale.languages')) as $lang)
+                        @if ($lang != App::getLocale())
+                        <x-dropdown-link href="{!! route('lang.swap', $lang) !!}">
+                            {!! $lang !!} <small>{!! $lang !!}</small>
+                        </x-dropdown-link>
                         @endif
+                        @endforeach
+                        @endif
+                        <x-dropdown-link id="app">
+                            <dark-mode-toggle></dark-mode-toggle>
+                        </x-dropdown-link>
                     </x-slot>
                 </x-dropdown>
             </div>
