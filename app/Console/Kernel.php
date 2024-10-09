@@ -5,6 +5,8 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Jobs\UpdateSubscriptionState;
+use App\Jobs\SendReminderEmails;
+use App\Jobs\SendReminderWhatsapp;
 
 class Kernel extends ConsoleKernel
 {
@@ -13,11 +15,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        //$schedule->command('inspire')->hourly();
-        //$schedule->command('reminder:sen')->dailyAt('14:38');
-        $schedule->command('emails:send-reminders')->dailyAt('18:47');
-        $schedule->command('whatsapp:send-reminders')->daily();
-        $schedule->job(new UpdateSubscriptionState)->dailyAt('18:47');
+        $schedule->job(SendReminderEmails::class)->dailyAt('09:00');
+        $schedule->job(SendReminderWhatsapp::class)->dailyAt('09:00');
+        $schedule->job(UpdateSubscriptionState::class)->dailyAt('00:00');
     }
 
     /**

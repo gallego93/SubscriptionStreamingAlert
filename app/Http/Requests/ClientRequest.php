@@ -26,17 +26,18 @@ class ClientRequest extends FormRequest
 
         return [
             'name' => 'required|string|max:255',
-            'email' => [
-                'required',
-                'email',
-                'max:255',
-                Rule::unique('clients', 'email')->ignore($clientId)
-            ],
+            'address' => 'string|max:255',
             'phone' => [
                 'required',
                 'string',
                 'max:20',
                 Rule::unique('clients', 'phone')->ignore($clientId)
+            ],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('clients', 'email')->ignore($clientId)
             ],
         ];
     }

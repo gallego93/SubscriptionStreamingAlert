@@ -21,6 +21,8 @@ trait LogTrait
             'exception_message' => $e->getMessage(),
             'file' => $e->getFile(),
             'line' => $e->getLine(),
+            'url' => request()->fullUrl(),
+            'user_id' => auth()->id(),
             'trace' => $e->getTraceAsString(),
         ], $context);
 

@@ -35,6 +35,7 @@ class UpdateSubscriptionState implements ShouldQueue
                 if (Carbon::now()->isSameDay($subscription->final_date)) {
                     $subscription->status = false;
                     $subscription->save();
+                    $this->logInfo('Updated subscription status to inactive: ' . $subscription->id);
                 }
             }
         } catch (\Exception $e) {
