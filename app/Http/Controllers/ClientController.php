@@ -2,19 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Clients;
 use App\Http\Requests\ClientRequest;
 use App\Http\Requests\IndexRequest;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Validation\ValidationException;
-use Exception;
-use App\Traits\LogTrait;
 use Illuminate\Support\Facades\Auth;
 
 class ClientController extends Controller
 {
-    use LogTrait;
     /**
      * Display a listing of the resource.
      */
@@ -24,20 +18,11 @@ class ClientController extends Controller
         $search = $request->input('search');
         $user = Auth::user();
 
-        try {
-            if ($user->hasRole('admin')) {
-                $clients = Clients::WithSearch($search)->paginate($perPage);
-            } else {
-                $clients = Clients::where('user_id', $user->id)
-                    ->WithSearch($search)
-                    ->paginate($perPage);
-            }
+        $clients = $user->hasRole('admin')
+            ? Clients::WithSearch($search)->paginate($perPage)
+            : Clients::where('user_id', $user->id)->WithSearch($search)->paginate($perPage);
 
-            return view('clients.index', compact('clients', 'perPage', 'search'));
-        } catch (Exception $e) {
-            $this->logError($e);
-            return redirect()->route('dashboard')->with('error', 'Hubo un problema al cargar los clientes.');
-        }
+        return view('clients.index', compact('clients', 'perPage', 'search'));
     }
 
     /**
@@ -53,20 +38,12 @@ class ClientController extends Controller
      */
     public function store(ClientRequest $request)
     {
-        try {
-            $clientData = $request->all();
-            $clientData['user_id'] = auth()->id();
+        $requestData = $request->validated();
+        $requestData['user_id'] = auth()->id();
 
-            $client = Clients::create($clientData);
-
-            return redirect()->route('clients.index', $client->id)
-                ->with('info', 'Cliente ' . $client->name . ' guardado con éxito!');
-        } catch (ValidationException $e) {
-            return redirect()->back()->withErrors($e->errors())->withInput();
-        } catch (Exception $e) {
-            $this->logError($e);
-            return redirect()->route('clients.index')->with('error', 'No se pudo guardar el cliente.');
-        }
+        Clients::create($requestData);
+        return redirect()->route('clients.index')
+            ->with('info', 'Registro guardado con exito.');
     }
 
     /**
@@ -74,14 +51,8 @@ class ClientController extends Controller
      */
     public function show(string $id)
     {
-        try {
-            $client = Clients::findOrFail($id);
-            return view('clients.show', compact('client'));
-        } catch (ModelNotFoundException $e) {
-            return redirect()->route('clients.index')->with('error', 'Cliente no encontrado.');
-        } catch (Exception $e) {
-            return redirect()->route('clients.index')->with('error', 'Hubo un problema al mostrar el cliente.');
-        }
+        $client = Clients::findOrFail($id);
+        return view('clients.show', compact('client'));
     }
 
     /**
@@ -89,14 +60,8 @@ class ClientController extends Controller
      */
     public function edit(string $id)
     {
-        try {
-            $client = Clients::findOrFail($id);
-            return view('clients.edit', compact('client'));
-        } catch (ModelNotFoundException $e) {
-            return redirect()->route('clients.index')->with('error', 'Cliente no encontrado.');
-        } catch (Exception $e) {
-            return redirect()->route('clients.index')->with('error', 'Hubo un problema al cargar el formulario de edición.');
-        }
+        $client = Clients::findOrFail($id);
+        return view('clients.edit', compact('client'));
     }
 
     /**
@@ -104,25 +69,15 @@ class ClientController extends Controller
      */
     public function update(ClientRequest $request, string $id)
     {
-        try {
-            $client = Clients::findOrFail($id);
+        $client = Clients::findOrFail($id);
+        $requestData = $request->validated();
+        $requestData['email_send'] = $request->has('email_send');
+        $requestData['whatsapp_send'] = $request->has('whatsapp_send');
 
-            // Convertir checkboxes a booleano
-            $requestData = $request->validated();
-            $requestData['email_send'] = $request->has('email_send');
-            $requestData['whatsapp_send'] = $request->has('whatsapp_send');
+        $client->update($requestData);
 
-            $client->update($requestData);
-
-            return redirect()->route('clients.edit', $client->id)
-                ->with('info', 'Cliente ' . $client->name . ' actualizado con éxito.');
-        } catch (ModelNotFoundException $e) {
-            return redirect()->route('clients.index')->with('error', 'Cliente no encontrado.');
-        } catch (ValidationException $e) {
-            return redirect()->back()->withErrors($e->errors())->withInput();
-        } catch (Exception $e) {
-            return redirect()->route('clients.index')->with('error', 'No se pudo actualizar el cliente.');
-        }
+        return redirect()->route('clients.edit', $client->id)
+            ->with('info', 'Cliente ' . $client->name . ' actualizado con éxito.');
     }
 
     /**
@@ -130,14 +85,8 @@ class ClientController extends Controller
      */
     public function destroy(string $id)
     {
-        try {
-            $client = Clients::findOrFail($id);
-            $client->delete();
-            return back()->with('info', 'Cliente eliminado con éxito.');
-        } catch (ModelNotFoundException $e) {
-            return redirect()->route('clients.index')->with('error', 'Cliente no encontrado.');
-        } catch (Exception $e) {
-            return redirect()->route('clients.index')->with('error', 'No se pudo eliminar el cliente.');
-        }
+        $client = Clients::findOrFail($id);
+        $client->delete();
+        return back()->with('info', 'Cliente eliminado con éxito.');
     }
 }

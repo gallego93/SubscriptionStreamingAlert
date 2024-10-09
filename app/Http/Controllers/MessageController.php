@@ -14,7 +14,7 @@ class MessageController extends Controller
     {
         $messages = Message::paginate();
 
-            return view('messages.index', compact('messages'));
+        return view('messages.index', compact('messages'));
     }
 
     /**
@@ -23,7 +23,7 @@ class MessageController extends Controller
     public function edit(string $id)
     {
         $message = Message::find($id);
-            return view('messages.edit', compact('message'));
+        return view('messages.edit', compact('message'));
     }
 
     /**
@@ -34,7 +34,7 @@ class MessageController extends Controller
         $message = Message::find($id);
         $message->update($request->all());
 
-            return redirect()->route('messages.edit', $message->id)
-                ->with('info', 'Mensaje ' . $message->name . ' guardado con éxito.');
+        return redirect()->route('messages.edit')
+            ->with('info', 'Registro guardado con éxito.');
     }
 }

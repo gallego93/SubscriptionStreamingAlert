@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\IndexRequest;
 use App\Http\Requests\RoleRequest;
-use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -34,11 +33,12 @@ class RoleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(RoleRequest $request)
     {
         Role::create(['name' => $request->name]);
 
-        return redirect()->route('roles.index')->with('success', 'Registro guardado de manera exitosa!');
+        return redirect()->route('roles.index')
+            ->with('success', 'Registro guardado de manera exitosa!');
     }
 
     /**
@@ -55,7 +55,7 @@ class RoleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(RoleRequest $request, $id)
     {
         $role = Role::findOrFail($id);
         $role->update(['name' => $request->name]);
@@ -63,7 +63,8 @@ class RoleController extends Controller
 
         $role->syncPermissions($selectedPermissions->pluck('name')->toArray());
 
-        return redirect()->route('roles.index')->with('success', 'Registro modificado de manera exitosa!');
+        return redirect()->route('roles.index')
+            ->with('success', 'Registro modificado de manera exitosa!');
     }
 
     /**
@@ -74,6 +75,7 @@ class RoleController extends Controller
         $role = Role::findOrFail($id);
         $role->delete();
 
-        return redirect()->route('roles.index')->with('success', 'Registro eliminado de manera exitosa!');
+        return redirect()->route('roles.index')
+            ->with('success', 'Registro eliminado de manera exitosa!');
     }
 }

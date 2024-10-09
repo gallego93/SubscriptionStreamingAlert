@@ -93,15 +93,6 @@
                             {!! trans('messages.profile') !!}
                         </x-dropdown-link>
 
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {!! trans('messages.log_out') !!}
-                            </x-dropdown-link>
-                        </form>
                         <!-- Traslation -->
                         @if (config('locale.status') && count(config('locale.languages')) > 1)
 
@@ -113,9 +104,21 @@
                         @endif
                         @endforeach
                         @endif
+
+                        <!-- DarkMode -->
                         <x-dropdown-link id="app">
                             <dark-mode-toggle></dark-mode-toggle>
                         </x-dropdown-link>
+
+                        <!-- Authentication -->
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+
+                            <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
+                                                this.closest('form').submit();">
+                                {!! trans('messages.log_out') !!}
+                            </x-dropdown-link>
+                        </form>
                     </x-slot>
                 </x-dropdown>
             </div>

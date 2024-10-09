@@ -14,4 +14,5 @@ return [
     'update_record' => 'Modificar',
     'save' => 'Guardar',
     'no_records' => 'No existen registros.',
+    'status' => 'Estado',
 ];

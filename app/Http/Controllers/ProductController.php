@@ -3,12 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductRequest;
-use Illuminate\Http\Request;
 use App\Models\Products;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Validation\ValidationException;
 use App\Http\Requests\IndexRequest;
-use Exception;
 
 class ProductController extends Controller
 {
@@ -20,14 +16,9 @@ class ProductController extends Controller
         $perPage = $request->input('per_page', 20);
         $search = $request->input('search');
 
-        try {
-            $products = Products::withSearch($search)
-                ->paginate($perPage);
-
-            return view('products.index', compact('products', 'perPage', 'search'));
-        } catch (Exception $e) {
-            return redirect()->route('dashboard')->with('error', 'Hubo un problema al cargar los registros.');
-        }
+        $products = Products::withSearch($search)
+            ->paginate($perPage);
+        return view('products.index', compact('products', 'perPage', 'search'));
     }
 
     /**
@@ -43,19 +34,12 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
-        try {
-            $productData = $request->all();
-            $productData['user_id'] = auth()->id();
+        $requestData = $request->all();
+        $requestData['user_id'] = auth()->id();
 
-            $product = Products::create($productData);
-
-            return redirect()->route('products.index', $product->id)
-                ->with('info', 'Registro ' . $product->name . ' guardado con éxito!');
-        } catch (ValidationException $e) {
-            return redirect()->back()->withErrors($e->errors())->withInput();
-        } catch (Exception $e) {
-            return redirect()->route('products.index')->with('error', 'No se pudo guardar el registro.');
-        }
+        Products::create($requestData);
+        return redirect()->route('products.index')
+            ->with('info', 'Registro guardado con éxito!');
     }
 
     /**
@@ -63,14 +47,8 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        try {
-            $product = Products::find($id);
-            return view('products.show', compact('product'));
-        } catch (ModelNotFoundException $e) {
-            return redirect()->route('clients.index')->with('error', 'Registro no encontrado.');
-        } catch (Exception $e) {
-            return redirect()->route('clients.index')->with('error', 'Hubo un problema al mostrar el registro.');
-        }
+        $product = Products::findOrFail($id);
+        return view('products.show', compact('product'));
     }
 
     /**
@@ -78,14 +56,8 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        try {
-            $product = Products::find($id);
-            return view('products.edit', compact('product'));
-        } catch (ModelNotFoundException $e) {
-            return redirect()->route('products.index')->with('error', 'Registro no encontrado.');
-        } catch (Exception $e) {
-            return redirect()->route('products.index')->with('error', 'Hubo un problema al cargar el formulario de edición.');
-        }
+        $product = Products::findOrFail($id);
+        return view('products.edit', compact('product'));
     }
 
     /**
@@ -93,18 +65,12 @@ class ProductController extends Controller
      */
     public function update(ProductRequest $request, string $id)
     {
-        try {
-            $product = Products::find($id);
-            $product->update($request->all());
-            return redirect()->route('products.edit', $product->id)
-                ->with('info', 'registro ' . $product->name . ' guardado con éxito.');
-        } catch (ModelNotFoundException $e) {
-            return redirect()->route('products.index')->with('error', 'Registro no encontrado.');
-        } catch (ValidationException $e) {
-            return redirect()->back()->withErrors($e->errors())->withInput();
-        } catch (Exception $e) {
-            return redirect()->route('products.index')->with('error', 'No se pudo actualizar el registro.');
-        }
+        $product = Products::findOrFail($id);
+        $requestData = $request->validated();
+
+        $product->update($requestData);
+        return redirect()->route('products.edit', $product->id)
+            ->with('info', 'Registro modificado con éxito.');
     }
 
     /**
@@ -112,13 +78,8 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        try {
-            $product = Products::find($id)->delete();
-            return back()->with('info', 'Registro eliminado con éxito.');
-        } catch (ModelNotFoundException $e) {
-            return redirect()->route('products.index')->with('error', 'Registro no encontrado.');
-        } catch (Exception $e) {
-            return redirect()->route('products.index')->with('error', 'No se pudo eliminar el registro.');
-        }
+        $product = Products::findOrFail($id);
+        $product->delete();
+        return back()->with('info', 'Registro eliminado con éxito.');
     }
 }
