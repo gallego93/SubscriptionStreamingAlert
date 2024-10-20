@@ -31,8 +31,10 @@ class SubscriptionController extends Controller
      */
     public function create()
     {
+        $userId = auth()->id();
+
         return view('subscriptions.create', [
-            'clients' => Clients::pluck('name', 'id'),
+            'clients' => Clients::where('user_id', $userId)->pluck('name', 'id'),
             'products' => Products::pluck('name', 'id')
         ]);
     }
@@ -63,10 +65,12 @@ class SubscriptionController extends Controller
      */
     public function edit(string $id)
     {
+        $userId = auth()->id();
+
         $subscription = Subscriptions::findOrFail($id);
         return view('subscriptions.edit', [
             'subscription' => $subscription,
-            'clients' => Clients::pluck('name', 'id'),
+            'clients' => Clients::where('user_id', $userId)->pluck('name', 'id'),
             'products' => Products::pluck('name', 'id')
         ]);
     }

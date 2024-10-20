@@ -13,4 +13,13 @@ return [
     'message' => 'Message',
     'edit' => 'Edit',
     'write_message' => 'Write your thoughts here...',
+    'settings' => 'Settings',
+    'update_credential' => 'Update Credential.',
+    'services_credential' => 'Make sure you have the correct key and value for the service.',
+    'records_per_page' => 'Records Per Page',
+    'search' => 'Search',
+    'apply' => 'Apply',
+    'search_records' => 'Search Records',
+    'no_records' => 'There are no records.',
+
 ];

@@ -9,4 +9,5 @@ return [
     'update' => 'Modificar',
     'assing_roles' => 'Asignar roles',
     'no_records' => 'No existen registros.',
+    'assing_roles' => 'Asignar Roles',
 ];

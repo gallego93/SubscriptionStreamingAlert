@@ -2,27 +2,22 @@
     <x-slot name="header">
         <div class="h-10 grid grid-cols-3 gap-4 content-start">
             <div class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                @can('permissions.create')
-                <a href="{{ route('permissions.create') }}">
-                    <button class="font-semibold ml-2 bg-blue-500 text-white px-2 py-1 rounded">{!!
-                        trans('permissions.add_new_record') !!}</button>
-                </a>
-                @endcan
+                <!-- -->
             </div>
             <form action="{{ route('permissions.index') }}" method="GET">
-                <input class="rounded px-2 py-1" name="search" value="{{ request('search') }}"
-                    placeholder="Buscar permisos...">
+                <input class="rounded px-2 py-1" name="search" value="{{ request('search') }}" placeholder="{!!
+                    trans('messages.search_records') !!}">
                 <button type="submit"
-                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white rounded ">Buscar</button>
+                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white rounded ">{!!
+                    trans('messages.search') !!}</button>
             </form>
             <form action="{{ route('permissions.index') }}" method="GET" class="flex items-center">
                 <!-- Preserva los parámetros de búsqueda en este formulario -->
                 <input type="hidden" name="search" value="{{ request('search') }}">
                 <input type="hidden" name="field" value="{{ request('field') }}">
 
-                <label for="per_page"
-                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">Registros por
-                    página:</label>
+                <label for="per_page" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{!!
+                    trans('messages.records_per_page') !!}</label>
                 <select name="per_page" id="per_page" class="border border-gray-300 rounded px-2 py-1">
                     <option value="5" {{ request('per_page')==5 ? 'selected' : '' }}>5</option>
                     <option value="10" {{ request('per_page')==10 ? 'selected' : '' }}>10</option>
@@ -30,8 +25,8 @@
                     <option value="50" {{ request('per_page')==50 ? 'selected' : '' }}>50</option>
                     <option value="100" {{ request('per_page')==100 ? 'selected' : '' }}>100</option>
                 </select>
-                <button type="submit"
-                    class="font-semibold ml-2 bg-blue-500 text-white px-2 py-1 rounded">Aplicar</button>
+                <button type="submit" class="font-semibold ml-2 bg-blue-500 text-white px-2 py-1 rounded">{!!
+                    trans('messages.apply') !!}</button>
             </form>
         </div>
     </x-slot>
@@ -42,16 +37,9 @@
                     <th scope="col" class="px-6 py-3">
                         {!! trans('permissions.name') !!}
                     </th>
-                    @can('permissions.edit')
                     <th scope="col" class="px-6 py-3">
-                        {!! trans('permissions.edit') !!}
+                        {!! trans('permissions.description') !!}
                     </th>
-                    @endcan
-                    @can('permissions.delete')
-                    <th scope="col" class="px-6 py-3">
-                        {!! trans('permissions.delete') !!}
-                    </th>
-                    @endcan
                 </tr>
             </thead>
             <tbody>
@@ -60,24 +48,9 @@
                     <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                         {{ $row->name }}
                     </th>
-                    @can('permissions.edit')
-                    <td class="px-6 py-4 text-right">
-                        <a href="{{ route('permissions.edit', $row->id) }}"
-                            class="font-medium text-blue-600 dark:text-blue-500 hover:underline">{!!
-                            trans('permissions.edit') !!}</a>
-                    </td>
-                    @endcan
-                    @can('permissions.delete')
-                    <td class="px-6 py-4 text-right">
-                        <form method="post" action="{{ route('permissions.destroy', $row->id) }}">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                                {!! trans('permissions.delete') !!}
-                            </button>
-                        </form>
-                    </td>
-                    @endcan
+                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        {{ $row->description }}
+                    </th>
                 </tr>
                 @endforeach
             </tbody>

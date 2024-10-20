@@ -14,16 +14,26 @@ class ClientSeeder extends Seeder
      */
     public function run()
     {
-        $faker = Faker::create();
-
-        for ($i = 0; $i < 1000; $i++) {
-            Clients::create([
-                'name' => $faker->name,
-                'address' => $faker->address,
-                'phone' => $faker->phoneNumber,
-                'email' => $faker->unique()->safeEmail,
-                'user_id' => $faker->randomElement([2, 3]),
-            ]);
-        }
+        Clients::create([
+            'name' => 'Señor Thompson',
+            'address' => 'avenida siempre viva 123',
+            'phone' => '764 - 84377',
+            'email' => 'thompson@fake.com',
+            'user_id' => '2',
+        ]);
+        Clients::create([
+            'name' => 'Hermes Conrad',
+            'address' => '7297 Tressa Street',
+            'phone' => '(585) 749-3727',
+            'email' => 'hermes@fake.com',
+            'user_id' => '2',
+        ]);
+        Clients::create([
+            'name' => 'Guillermo Pfeffer',
+            'address' => '424 Rolfson Stream Apt. 252',
+            'phone' => '+1-269-778-5639',
+            'email' => 'littel.austen@hotmail.com',
+            'user_id' => '3',
+        ]);
     }
 }

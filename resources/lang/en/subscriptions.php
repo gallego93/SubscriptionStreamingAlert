@@ -15,4 +15,6 @@ return [
     'save' => 'Save',
     'no_records' => 'There are no records.',
     'status' => 'Status',
+    'subscription_status' => 'Subscripcion Status',
+    'state_asset' => 'State Asset',
 ];

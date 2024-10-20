@@ -14,4 +14,6 @@ return [
     'edit' => 'Editar',
     'update_record' => 'Modificar',
     'no_records' => 'No existen registros.',
+    'send_email' => 'Enviar Correo Electronico',
+    'send_whatsapp' => 'Enviar Whatsapp',
 ];

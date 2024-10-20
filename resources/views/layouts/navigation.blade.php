@@ -11,13 +11,11 @@
                 </div>
 
                 <!-- Navigation Links -->
-                @can('dashboard.index')
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {!! trans('messages.dashboard') !!}
                     </x-nav-link>
                 </div>
-                @endcan
                 @can('users.index')
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="url('users')" :active="request()->routeIs('users')">
@@ -91,6 +89,10 @@
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
                             {!! trans('messages.profile') !!}
+                        </x-dropdown-link>
+
+                        <x-dropdown-link :href="route('settings.index')">
+                            {!! trans('messages.settings') !!}
                         </x-dropdown-link>
 
                         <!-- Traslation -->

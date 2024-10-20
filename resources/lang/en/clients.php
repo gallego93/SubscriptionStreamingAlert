@@ -14,4 +14,6 @@ return [
     'edit' => 'Edit',
     'update_record' => 'Update',
     'no_records' => 'There are no records.',
+    'send_email' => 'Send Email',
+    'send_whatsapp' => 'Send Whatsapp',
 ];

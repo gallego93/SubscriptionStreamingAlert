@@ -56,8 +56,8 @@
                                     dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700
                                     focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                     <label for="vue-checkbox"
-                                        class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Enviar
-                                        Correo</label>
+                                        class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{!!
+                                        trans('clients.send_email') !!}</label>
                                 </div>
                             </li>
                             <li class="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
@@ -69,8 +69,8 @@
                                     dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700
                                     focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                     <label for="vue-checkbox"
-                                        class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Enviar
-                                        Whatsapp</label>
+                                        class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{!!
+                                        trans('clients.send_whatsapp') !!}</label>
                                 </div>
                             </li>
                         </ul>
