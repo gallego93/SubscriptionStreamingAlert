@@ -9,4 +9,5 @@ return [
     'send' => 'Send',
     'assing_permissions' => 'Assing permissions',
     'no_records' => 'There are no records.',
+    'description' => 'Description',
 ];

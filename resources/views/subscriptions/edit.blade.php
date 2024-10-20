@@ -63,7 +63,8 @@
                             placeholder="{!! trans('subscriptions.final_date') !!}">
                     </div>
                     <div class="form-group">
-                        <h3 class="mb-4 font-semibold text-gray-900 dark:text-white">Estado de la suscripción
+                        <h3 class="mb-4 font-semibold text-gray-900 dark:text-white">{!!
+                            trans('subscriptions.subscription_status') !!}
                         </h3>
                         <ul
                             class="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
@@ -76,8 +77,8 @@
                                     dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700
                                     focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                     <label for="vue-checkbox"
-                                        class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Estado
-                                        Activo</label>
+                                        class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{!!
+                                        trans('subscriptions.state_asset') !!}</label>
                                 </div>
                             </li>
                         </ul>

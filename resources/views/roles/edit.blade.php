@@ -35,7 +35,7 @@
                                     focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                     <label for="vue-checkbox"
                                         class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{{
-                                        $permission->name }}</label>
+                                        $permission->description }}</label>
                                 </div>
                             </li>
                             @endforeach

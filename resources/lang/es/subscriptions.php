@@ -15,4 +15,6 @@ return [
     'save' => 'Guardar',
     'no_records' => 'No existen registros.',
     'status' => 'Estado',
+    'subscription_status' => 'Estado de la suscripción.',
+    'state_asset' => 'Estado Activo',
 ];
